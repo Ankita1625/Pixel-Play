@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whack-a-Mole</title>
+    <style>
+        body {
+            text-align: center;
+            background-color: #8FBC8F;
+        }
+        h1 {
+            color: white;
+        }
+        .game-container {
+            display: grid;
+            grid-template-columns: repeat(5, 100px);
+            grid-gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .hole {
+            width: 100px;
+            height: 100px;
+            background-color: brown;
+            border-radius: 50%;
+            position: relative;
+            cursor: pointer;
+        }
+        .mole {
+            width: 80px;
+            height: 80px;
+            background-color: black;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            display: none;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Whack-a-Mole</h1>
+    <p>Score: <span id="score">0</span></p>
+    <p>Time Left: <span id="time">60</span> sec</p>
+    <div class="game-container" id="game-container"></div>
+    <button onclick="startGame()">Start Game</button>
+    <button onclick="goHome()">Go to Home</button>
+
+    <script>
+        let score = 0;
+        let timeLeft = 60;
+        let activeMoles = [];
+        let gameInterval;
+        let timerInterval;
+
+        function createGameBoard() {
+            const container = document.getElementById('game-container');
+            container.innerHTML = '';
+            for (let i = 0; i < 20; i++) {
+                const hole = document.createElement('div');
+                hole.classList.add('hole');
+                hole.onclick = () => whackMole(i);
+                const mole = document.createElement('div');
+                mole.classList.add('mole');
+                mole.id = `mole${i}`;
+                hole.appendChild(mole);
+                container.appendChild(hole);
+            }
+        }
+
+        function startGame() {
+            score = 0;
+            timeLeft = 60;
+            document.getElementById('score').textContent = score;
+            document.getElementById('time').textContent = timeLeft;
+            createGameBoard();
+
+            gameInterval = setInterval(() => {
+                let moleIndex = Math.floor(Math.random() * 20);
+                if (activeMoles.length > 0) {
+                    activeMoles.forEach(index => {
+                        document.getElementById(`mole${index}`).style.display = 'none';
+                    });
+                    activeMoles = [];
+                }
+                activeMoles.push(moleIndex);
+                document.getElementById(`mole${moleIndex}`).style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById(`mole${moleIndex}`).style.display = 'none';
+                }, 800);
+            }, 1000);
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('time').textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(gameInterval);
+                    clearInterval(timerInterval);
+                    alert(`Time's up! Final Score: ${score}`);
+                }
+            }, 1000);
+        }
+
+        function whackMole(index) {
+            if (activeMoles.includes(index)) {
+                score++;
+                document.getElementById('score').textContent = score;
+                document.getElementById(`mole${index}`).style.display = 'none';
+                activeMoles = activeMoles.filter(m => m !== index);
+            }
+        }
+
+        function goHome() {
+            window.location.href = 'main.html';
+        }
+    </script>
+</body>
+</html>

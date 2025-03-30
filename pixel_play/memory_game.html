@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Card Game</title>
+    <style>
+        body {
+            text-align: center;
+            background-color: black;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .game-container {
+            display: flex;
+            align-items: flex-start;
+        }
+        .rules {
+            margin-left: 20px;
+            padding: 10px;
+            border: 2px solid white;
+            width: 250px;
+            text-align: left;
+            font-size: 18px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-gap: 10px;
+            margin-top: 20px;
+        }
+        .card {
+            width: 100px;
+            height: 100px;
+            background-color: white;
+            color: black;
+            font-size: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+        .button-container {
+            margin-top: 20px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .timer {
+            margin-top: 10px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Memory Card Game</h1>
+    <div class="game-container">
+        <div>
+            <div class="timer">Time: <span id="time">0</span> seconds</div>
+            <div class="grid" id="gameBoard"></div>
+            <div class="button-container">
+                <button onclick="restartGame()">Play Again</button>
+                <button onclick="goToHome()">Go to Home</button>
+            </div>
+        </div>
+        <div class="rules">
+            <h2>Game Rules</h2>
+            <ul>
+                <li>Click on a card to reveal its value.</li>
+                <li>Find and match pairs of identical cards.</li>
+                <li>If two selected cards match, they stay revealed.</li>
+                <li>If they don't match, they flip back over.</li>
+                <li>Try to match all pairs with the fewest moves!</li>
+                <li>Your time is recorded – try to solve it as fast as possible!</li>
+            </ul>
+        </div>
+    </div>
+    <script>
+        const symbols = ['A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'E', 'E', 'F', 'F', 'G', 'G', 'H', 'H'];
+        let shuffledSymbols = symbols.sort(() => 0.5 - Math.random());
+        let selectedCards = [];
+        let matchedCards = [];
+        let timer;
+        let timeElapsed = 0;
+        const gameBoard = document.getElementById("gameBoard");
+        const timeDisplay = document.getElementById("time");
+
+        function startTimer() {
+            clearInterval(timer);
+            timeElapsed = 0;
+            timeDisplay.textContent = timeElapsed;
+            timer = setInterval(() => {
+                timeElapsed++;
+                timeDisplay.textContent = timeElapsed;
+            }, 1000);
+        }
+
+        function createBoard() {
+            gameBoard.innerHTML = "";
+            shuffledSymbols.forEach((symbol, index) => {
+                let card = document.createElement("div");
+                card.classList.add("card");
+                card.dataset.symbol = symbol;
+                card.dataset.index = index;
+                card.innerText = "?";
+                card.addEventListener("click", flipCard);
+                gameBoard.appendChild(card);
+            });
+            startTimer();
+        }
+
+        function flipCard() {
+            if (selectedCards.length < 2 && !this.classList.contains("matched")) {
+                this.innerText = this.dataset.symbol;
+                selectedCards.push(this);
+                if (selectedCards.length === 2) {
+                    setTimeout(checkMatch, 500);
+                }
+            }
+        }
+
+        function checkMatch() {
+            if (selectedCards[0].dataset.symbol === selectedCards[1].dataset.symbol) {
+                selectedCards[0].classList.add("matched");
+                selectedCards[1].classList.add("matched");
+                matchedCards.push(selectedCards[0], selectedCards[1]);
+            } else {
+                selectedCards[0].innerText = "?";
+                selectedCards[1].innerText = "?";
+            }
+            selectedCards = [];
+            if (matchedCards.length === symbols.length) {
+                clearInterval(timer);
+                alert(`Congratulations! You've matched all pairs in ${timeElapsed} seconds!`);
+            }
+        }
+
+        function restartGame() {
+            shuffledSymbols = symbols.sort(() => 0.5 - Math.random());
+            selectedCards = [];
+            matchedCards = [];
+            createBoard();
+        }
+
+        function goToHome() {
+            window.location.href = 'main.html';
+        }
+
+        createBoard();
+    </script>
+</body>
+</html>
